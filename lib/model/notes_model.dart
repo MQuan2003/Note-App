@@ -33,7 +33,7 @@ class Note {
       content: map['content'],
       color: map['color'],
       dateTime: map['dateTime'],
-      checklist: map['checklist']?.split(','),
+      checklist: map['checklist']?.split(',')?? [],
     );
   }
 }

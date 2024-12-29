@@ -73,4 +73,14 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<int> updateChecklist(int noteId, List<String> updatedChecklist) async {
+  final db = await database;
+  return await db.update(
+    'notes',
+    {'checklist': updatedChecklist.join(',')},
+    where: 'id = ?',
+    whereArgs: [noteId],
+  );
+}
 }
