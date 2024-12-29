@@ -4,6 +4,7 @@ class Note {
   final String content;
   final String color;
   final String dateTime;
+  final List<String>? checklist;
 
   Note({
     this.id,
@@ -11,6 +12,7 @@ class Note {
     required this.content,
     required this.color,
     required this.dateTime,
+    this.checklist,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,15 +22,18 @@ class Note {
       'content': content,
       'color': color,
       'dateTime': dateTime,
+      'checklist': checklist?.join(','),
     };
   }
 
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
-        id: map['id'],
-        title: map['title'],
-        content: map['content'],
-        color: map['color'],
-        dateTime: map['dateTime']);
+      id: map['id'],
+      title: map['title'],
+      content: map['content'],
+      color: map['color'],
+      dateTime: map['dateTime'],
+      checklist: map['checklist']?.split(','),
+    );
   }
 }
