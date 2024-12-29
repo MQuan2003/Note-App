@@ -19,21 +19,29 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'my_notes.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Increment version to apply schema changes
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-    CREATE TABLE notes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      content TEXT,
-      color TEXT,
-      dateTime TEXT
-    )
-  ''');
+      CREATE TABLE notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        content TEXT,
+        color TEXT,
+        dateTime TEXT,
+        checklist TEXT
+      )
+    ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE notes ADD COLUMN checklist TEXT');
+    }
   }
 
   Future<int> insertNote(Note note) async {
