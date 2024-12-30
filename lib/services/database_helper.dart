@@ -19,7 +19,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'my_notes.db');
     return await openDatabase(
       path,
-      version: 2, // Increment version to apply schema changes
+      version: 3, // Increment version to apply schema changes
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -33,7 +33,8 @@ class DatabaseHelper {
         content TEXT,
         color TEXT,
         dateTime TEXT,
-        checklist TEXT
+        checklist TEXT,
+        tags TEXT
       )
     ''');
   }
@@ -42,6 +43,10 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       await db.execute('ALTER TABLE notes ADD COLUMN checklist TEXT');
     }
+
+    if (oldVersion < 3) { // Increment the version if needed
+    await db.execute('ALTER TABLE notes ADD COLUMN tags TEXT');
+  }
   }
 
   Future<int> insertNote(Note note) async {

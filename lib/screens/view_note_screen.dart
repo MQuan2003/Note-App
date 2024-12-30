@@ -175,7 +175,11 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                                           String updatedTask = entry.value;
                                           if (_completedTasks[entry.key]) {
                                             // Mark as checked
-                                            updatedTask += " (checked)";
+                                            if (!entry.value
+                                                .endsWith(" (checked)")) {
+                                              updatedTask =
+                                                  entry.value + " (checked)";
+                                            }
                                           } else {
                                             // Remove the checked status
                                             updatedTask = updatedTask
@@ -213,6 +217,32 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                             ],
                           );
                         }),
+                      if (widget.note.tags != null &&
+                          widget.note.tags!.isNotEmpty &&
+                          widget.note.tags!.any((tag) => tag.isNotEmpty))
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: widget.note.tags!.map((tag) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors
+                                    .black26, // Match the color from HomeScreen
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                tag,
+                                style: const TextStyle(
+                                  color: Colors
+                                      .white, // White text for better visibility
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                     ],
                   ),
                 ),

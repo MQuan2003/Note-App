@@ -18,6 +18,9 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final List<String> _checklist = [];
   final _checklistItemController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final List<String> _tags = [];
+  final TextEditingController _newTagController = TextEditingController();
 
   Color _selectedColor = Colors.amber;
   final List<Color> _colors = [
@@ -37,10 +40,29 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
       _titleController.text = widget.note!.title;
       _contentController.text = widget.note!.content;
       _selectedColor = Color(int.parse(widget.note!.color));
+      //_tags.addAll(widget.note!.tags ?? []);
+      //_tagsController.text = widget.note!.tags?.join(', ') ?? '';
+      _tags.addAll(widget.note!.tags ?? []); // Populate tags list
       if (widget.note!.checklist != null) {
         _checklist.addAll(widget.note!.checklist!);
       }
     }
+  }
+
+  void _addTag() {
+    final newTag = _newTagController.text.trim();
+    if (newTag.isNotEmpty && !_tags.contains(newTag)) {
+      setState(() {
+        _tags.add(newTag);
+        _newTagController.clear();
+      });
+    }
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _tags.remove(tag);
+    });
   }
 
   void _saveNote() {
@@ -51,6 +73,8 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
       color: _selectedColor.value.toString(),
       dateTime: DateTime.now().toString(),
       checklist: _checklist.isNotEmpty ? _checklist : null,
+      //tags: _tagsController.text.split(',').map((e) => e.trim()).toList(),
+      tags: _tags,
     );
 
     if (widget.note == null) {
@@ -59,9 +83,10 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
       _databaseHelper.updateNote(note);
     }
 
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomeScreen()),
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -112,6 +137,23 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                //Tags
+                TextField(
+                  controller: _newTagController,
+                  decoration: InputDecoration(
+                    hintText: "Add a tag",
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _addTag,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                //Checklist
                 TextField(
                   controller: _checklistItemController,
                   decoration: InputDecoration(
@@ -127,22 +169,25 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
                 ),
                 const SizedBox(height: 8),
                 if (_checklist.isNotEmpty)
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _checklist.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_checklist[index]),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _checklist.removeAt(index);
-                            });
-                          },
-                        ),
-                      );
-                    },
+                  SizedBox(
+                    height: 200, // You can adjust this height as needed
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _checklist.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(_checklist[index]),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _checklist.removeAt(index);
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 const SizedBox(height: 16),
                 Row(
@@ -168,6 +213,21 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
+
+                //Tags
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: _tags.map((tag) {
+                    return Chip(
+                      label: Text(tag),
+                      deleteIcon: const Icon(Icons.close),
+                      onDeleted: () => _removeTag(tag),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 8),
+
                 ElevatedButton(
                   onPressed: _saveNote,
                   style: ElevatedButton.styleFrom(

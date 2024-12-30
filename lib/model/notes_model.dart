@@ -5,6 +5,7 @@ class Note {
   final String color;
   final String dateTime;
   final List<String>? checklist;
+  final List<String>? tags;
 
   Note({
     this.id,
@@ -13,6 +14,7 @@ class Note {
     required this.color,
     required this.dateTime,
     this.checklist,
+    this.tags,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +25,7 @@ class Note {
       'color': color,
       'dateTime': dateTime,
       'checklist': checklist?.join(','),
+      'tags': tags?.join(','),
     };
   }
 
@@ -34,6 +37,7 @@ class Note {
       color: map['color'],
       dateTime: map['dateTime'],
       checklist: map['checklist']?.split(',')?? [],
+      tags: map['tags']?.split(',') ?? [],
     );
   }
 }
