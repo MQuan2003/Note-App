@@ -89,6 +89,8 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                 children: [
                   Text(
                     widget.note.title,
+                     maxLines: 2, // Limit the number of lines to 1
+                      overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,

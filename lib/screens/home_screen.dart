@@ -184,65 +184,64 @@ class _HomeScreenState extends State<HomeScreen> {
         _loadNotes();
       },
       onLongPress: () {
-      // Show the pop-up menu on long press
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        builder: (context) => Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text("Edit Note"),
-              onTap: () async {
-                Navigator.pop(context); // Close the menu
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AddEditNoteScreen(note: note),
-                  ),
-                );
-                _loadNotes(); // Reload notes after editing
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete),
-              title: const Text("Delete Note"),
-              onTap: () async {
-                Navigator.pop(context); // Close the menu
-                final confirm = await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+        // Show the pop-up menu on long press
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          builder: (context) => Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text("Edit Note"),
+                onTap: () async {
+                  Navigator.pop(context); // Close the menu
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddEditNoteScreen(note: note),
                     ),
-                    title: const Text("Delete Note"),
-                    content: const Text(
-                        "Are you sure you want to delete this note?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text("Cancel"),
+                  );
+                  _loadNotes(); // Reload notes after editing
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text("Delete Note"),
+                onTap: () async {
+                  Navigator.pop(context); // Close the menu
+                  final confirm = await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text("Delete"),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirm == true) {
-                  await _databaseHelper.deleteNote(note.id!);
-                  _loadNotes(); // Reload notes after deletion
-                }
-              },
-            ),
-          ],
-        ),
-      );
-    },
-
+                      title: const Text("Delete Note"),
+                      content: const Text(
+                          "Are you sure you want to delete this note?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Delete"),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    await _databaseHelper.deleteNote(note.id!);
+                    _loadNotes(); // Reload notes after deletion
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
       child: Container(
         margin: _isGridView
             ? EdgeInsets.zero
@@ -269,6 +268,8 @@ class _HomeScreenState extends State<HomeScreen> {
             RichText(
               text: _highlightText(
                   note.title, query, const TextStyle(color: Colors.white)),
+              maxLines: 1, // Limit the number of lines
+              overflow: TextOverflow.ellipsis, // Show ellipsis if too long
             ),
             const SizedBox(height: 8),
 
@@ -286,10 +287,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 2, // Limit the number of lines
                 overflow: TextOverflow.ellipsis, // Show ellipsis if too long
               ),
-            const SizedBox(height: 8), // Space between content and checklist
+            //const SizedBox(height: 8), // Space between content and checklist
 
             // Display checklist items if any
-            if (checklist.isNotEmpty)
+            if (note.content.isEmpty && checklist.isNotEmpty)
               Flexible(
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -301,8 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final itemText = item.replaceAll(" (checked)", "");
 
                     return Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.start, // Align horizontally
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Checkbox(
@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : TextDecoration.none,
                               ),
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -337,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (tags.isNotEmpty && tags.any((tag) => tag.isNotEmpty))
               ConstrainedBox(
                 constraints: const BoxConstraints(
-                  maxHeight: 50, // Limit the height to prevent overflow
+                  maxHeight: 20, // Limit the height to prevent overflow
                 ),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal, // Scroll horizontally
@@ -347,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: tags.map((tag) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.black26,
                           borderRadius: BorderRadius.circular(12),
@@ -385,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadNotes(); // Reload the notes after a change.
   }
 
-void _showOptions(Note note) {
+  void _showOptions(Note note) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -419,8 +419,8 @@ void _showOptions(Note note) {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   title: const Text("Delete Note"),
-                  content: const Text(
-                      "Are you sure you want to delete this note?"),
+                  content:
+                      const Text("Are you sure you want to delete this note?"),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
@@ -560,8 +560,6 @@ void _showOptions(Note note) {
                 return _buildNoteCard(note, query);
               },
             ),
-
-
 
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
